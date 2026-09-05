@@ -2,7 +2,8 @@
   "name": "smart-cod",
   "private": true,
   "scripts": {
-    "build": "remix vite:build",
+    "build": "prisma generate && remix vite:build",
+    "postinstall": "prisma generate",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
@@ -24,6 +25,7 @@
   "dependencies": {
     "@prisma/client": "^5.11.0",
     "@remix-run/dev": "^2.7.1",
+    "@vercel/remix": "^2.15.2",
     "@remix-run/node": "^2.7.1",
     "@remix-run/react": "^2.7.1",
     "@remix-run/serve": "^2.7.1",

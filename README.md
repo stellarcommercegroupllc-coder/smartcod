@@ -74,6 +74,9 @@ happen yet:
 app/
   routes/
     app.tsx                    admin layout + nav + onboarding redirect
+    _index.tsx                  PUBLIC marketing landing page at "/" — also
+                                 handles Shopify's install-time shop-param
+                                 redirect into /app (required, not optional)
     app.onboarding.tsx          3-step activation wizard (step 1 built)
     app._index.tsx               Analytics — charts, tables, submissions
     app.form-settings.tsx        Form Designer — fields, appearance, COD fee
@@ -94,6 +97,8 @@ extensions/smart-cod/
   blocks/smart-cod.liquid        storefront form markup (app embed, target: body)
   assets/smart-cod.js            form logic, bundle tiers, UTM capture
   assets/smart-cod.css           styling
+app/styles/
+  landing.css                    styles for the public "/" landing page
 ```
 
 `app.settings.tsx` tabs: **Visibility** (page/product/collection/country/
@@ -127,6 +132,32 @@ not `true` (this needs the `read_themes` scope, already in
 7. `npm run dev`.
 8. In the dev store's theme editor: Online Store → Themes → Customize →
    App embeds → turn on "Smart COD".
+
+## Deploying to Vercel
+
+This scaffold now builds on Vercel, but a few things differ from a normal
+Node host:
+
+- **Database must be Postgres**, not SQLite — `prisma/schema.prisma` is
+  already set to `provider = "postgresql"`. Provision one (Vercel
+  Postgres, Neon, Supabase, Railway — any of these work) and set
+  `DATABASE_URL` in your Vercel project's environment variables to its
+  connection string.
+- **Run migrations against that database** before or during first deploy:
+  `npx prisma migrate deploy` (from your machine, pointed at the
+  production `DATABASE_URL`, or as a one-off Vercel deploy step).
+- `vite.config.ts` only applies the `@vercel/remix` serverless preset when
+  the `VERCEL` environment variable is set (Vercel sets this
+  automatically) — building locally or on another host is unaffected.
+- If your build fails with `Missing "root" route file in /vercel/path0/app`,
+  it means Vercel's "Root Directory" project setting (Settings > General)
+  doesn't point at the folder that directly contains `package.json` and
+  `app/`. Check that `app/root.tsx` actually shows up in your repo on
+  GitHub at the path you expect — a common cause is an extra wrapper
+  folder introduced when unzipping/committing.
+- Session storage (`PrismaSessionStorage`) and all the app's own data live
+  in the same Postgres database — no separate setup needed once
+  `DATABASE_URL` points at it.
 
 ## Biggest next steps if you keep building this
 
